@@ -5,6 +5,9 @@ import 'package:check_list/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:lottie/lottie.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +28,25 @@ class MyApp extends StatelessWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: ThemeService().theme,
-      home: MyHomePage(),
+      home: SplashScreen(),
     );
   }
 }
 
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSplashScreen(
+      splash: Lottie.asset('assets/loading-circles.json'),
+      nextScreen:  MyHomePage(),
+      backgroundColor: Colors.white,
+      splashIconSize: 250,
+    //  splashTransition: SplashTransition.slideTransition
+     // pageTransitionType: PageTransitionType.topToBottom,
+      duration: 2000,
+     // animationDuration: Duration(seconds: 1),
+    );
+  }
+}

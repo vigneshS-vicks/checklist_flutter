@@ -20,8 +20,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
   final TextEditingController _noteController = TextEditingController();
   final TaskController _taskController = Get.put(TaskController());
   DateTime _selectedDate = DateTime.now();
-  String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
-  String _endTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
+  String _startTime = DateFormat("hh:mm a")
+      .format(DateTime.now().add(Duration(minutes: 10)))
+      .toString();
+  String _endTime = DateFormat("hh:mm a")
+      .format(DateTime.now().add(Duration(minutes: 10)))
+      .toString();
   int _selectedRemind = 5;
   List<int> remindList = [5, 10, 15, 20];
   String _selectedRepeat = "None";
@@ -34,6 +38,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       backgroundColor: context.theme.backgroundColor,
       appBar: _appBar(context),
       body: Container(
+        margin: const EdgeInsets.only(bottom: 8),
         padding: EdgeInsets.only(
           left: 20,
           right: 20,
@@ -253,7 +258,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   _getTimePicker() async {
     return await showTimePicker(
-        initialEntryMode: TimePickerEntryMode.input,
+        // initialEntryMode: TimePickerEntryMode.input,
         context: context,
         initialTime: TimeOfDay(
           hour: int.parse(_startTime.split(":")[0]),
@@ -326,8 +331,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   _addTaskToDb() async {
     int value = await _taskController.addTask(
         task: Task(
-      title: _titleController.text,
-      note: _noteController.text,
+      title: _titleController.text.toString(),
+      note: _noteController.text.toString(),
       isCompleted: 0,
       date: DateFormat.yMd().format(_selectedDate),
       startTime: _startTime,

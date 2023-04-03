@@ -35,6 +35,24 @@ class _MyHomePageState extends State<MyHomePage> {
     notifyHelper = NotifyHelper();
     notifyHelper.initializeNotification();
     notifyHelper.requestIOSPermissions();
+    _taskController.getTasks();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: context.theme.backgroundColor,
+        appBar: _appBar(),
+        body: Column(
+          children: [
+            _addTaskBar(),
+            _addDateBar(),
+            SizedBox(
+              height: 8,
+            ),
+            _showTasks(),
+          ],
+        ));
   }
 
   _appBar() {
@@ -45,11 +63,11 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: () {
           print("change Theme");
           ThemeService().switchTheme();
-          /*  notifyHelper.displayNotification(
-              title: "Vic",
+          notifyHelper.displayNotification(
+              title: "Check List",
               body: Get.isDarkMode
                   ? "Activated Light Theme"
-                  : "Activated Dark Theme");*/
+                  : "Activated Dark Theme");
 
           // notifyHelper.scheduledNotification();
         },
@@ -57,14 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
           Get.isDarkMode
               ? Icons.wb_sunny_outlined
               : Icons.nightlight_round_rounded,
-          size: 20,
+          size: 25,
           color: Get.isDarkMode ? Colors.white : Colors.black,
         ),
       ),
       actions: [
         Icon(
           Icons.person,
-          size: 20,
+          size: 25,
           color: Get.isDarkMode ? Colors.white : Colors.black,
         ),
         SizedBox(
@@ -101,7 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
             label: "+ Add Task",
             onTap: () async {
               await Get.to(AddTaskPage());
-              _taskController.getTasks();
             },
           )
         ],
@@ -154,20 +171,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: context.theme.backgroundColor,
-        appBar: _appBar(),
-        body: Column(
-          children: [
-            _addTaskBar(),
-            _addDateBar(),
-            _showTasks(),
-          ],
-        ));
-  }
-
   _showTasks() {
     return Expanded(
       child: Obx(() {
@@ -177,56 +180,71 @@ class _MyHomePageState extends State<MyHomePage> {
               print("total item ${_taskController.taskList.length}");
               Task task = _taskController.taskList[index];
               if (task.repeat == 'Daily') {
-                DateTime dateTime =
+                _notificationSchedulingLogic(task);
+               return _UIListviewLogic(index, task);
+              }
+              if (task.date == DateFormat.yMd().format(_selectedDate)) {
+                /*     DateTime dateTime =
                     DateFormat.jm().parse(task.startTime.toString());
                 var myTime = DateFormat("HH:mm").format(dateTime);
+                print(myTime.toString());
                 notifyHelper.scheduledNotification(
                     task.id!.toInt(),
                     task.title,
                     task.note,
                     int.parse(myTime.toString().split(":")[0]),
-                    int.parse(myTime.toString().split(":")[1]),
-                    task);
-
-                return AnimationConfiguration.staggeredList(
-                    position: index,
-                    child: SlideAnimation(
-                      child: FadeInAnimation(
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _showBottomSheet(context, task);
-                              },
-                              child: TaskTile(task),
-                            )
-                          ],
-                        ),
-                      ),
-                    ));
-              }
-              if (task.date == DateFormat.yMd().format(_selectedDate)) {
-                return AnimationConfiguration.staggeredList(
-                    position: index,
-                    child: SlideAnimation(
-                      child: FadeInAnimation(
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _showBottomSheet(context, task);
-                              },
-                              child: TaskTile(task),
-                            )
-                          ],
-                        ),
-                      ),
-                    ));
+                    // int.parse(myTime.toString().split(":")[1]),
+                    reminderNotificationTime,
+                    task);*/
+                _notificationSchedulingLogic(task);
+                return _UIListviewLogic(index, task);
               } else {
                 return Container();
               }
             });
       }),
+    );
+  }
+
+  _notificationSchedulingLogic(Task task) {
+    int reminderNotificationTime = 0;
+    DateTime dateTime = DateFormat.jm().parse(task.startTime.toString());
+    var myTime = DateFormat("HH:mm").format(dateTime);
+    print(myTime.toString());
+    if (int.parse(myTime.toString().split(":")[1]) > 4) {
+      reminderNotificationTime = int.parse(myTime.toString().split(":")[1]) -
+          int.parse(task.remind.toString());
+    } else {
+      reminderNotificationTime = int.parse(myTime.toString().split(":")[1]);
+    }
+    print("reminder min =$reminderNotificationTime");
+    notifyHelper.scheduledNotification(
+        task.id!.toInt(),
+        task.title,
+        task.note,
+        int.parse(myTime.toString().split(":")[0]),
+        // int.parse(myTime.toString().split(":")[1]),
+        reminderNotificationTime,
+        task);
+  }
+
+  _UIListviewLogic(int index, Task task) {
+    return AnimationConfiguration.staggeredList(
+      position: index,
+      child: SlideAnimation(
+        child: FadeInAnimation(
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  _showBottomSheet(context, task);
+                },
+                child: TaskTile(task),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 
